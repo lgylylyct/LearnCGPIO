@@ -24,46 +24,103 @@ GLuint vao[numVAOs];
 
 using namespace std;
 
+void printShaderLog(GLuint shader)
+{
+	int len = 0;
+	int chWrittn = 0;
+	char *log;
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+	if (len > 0)
+	{
+		log = (char *)malloc(len);
+		glGetShaderInfoLog(shader, len, &chWrittn, log);
+		cout << "Shader Info Log: " << log << endl;
+		free(log);
+	}
+}
+
+// displays the contents of OpenGL's log when GLSL linking failed
+void printProgramLog(int prog)
+{
+	int len = 0;
+	int chWrittn = 0;
+	char *log;
+	glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &len);
+	if (len > 0)
+	{
+		log = (char *)malloc(len);
+		glGetProgramInfoLog(prog, len, &chWrittn, log);
+		cout << "Program Info Log: " << log << endl;
+		free(log);
+	}
+}
+
+bool checkOpenGLError()
+{
+	bool foundError = false;
+	int glErr = glGetError();
+	while (glErr != GL_NO_ERROR)
+	{
+		cout << "glError: " << glErr << endl;
+		foundError = true;
+		glErr = glGetError();
+	}
+	return foundError;
+}
+
 GLuint createShaderProgram()
 {
 
-	// declares two shaders as character strings
+	GLint vertCompiled;
+	GLint fragCompiled;
+	GLint linked;
+
 	const char *vshaderSource =
 		"#version 410 \n"
 		"void main(void) \n"
-		// sets a vertex's coordinate position in 3D space
-		// origin location : (0,0,0)
 		"{gl_Position = vec4(0.0, 0.0, 0.0, 1.0);}";
-
 	const char *fshaderSource =
-		"#version 410 \n"
+		"#version 410 \n" // if I had used the module, I could notice the typo earlier
 		"out vec4 color; \n"
 		"void main(void) \n"
-		"{color = vec4(1.0, 0.0, 1.0, 1.0);}";
+		"{color = vec4(0.0, 0.0, 1.0, 1.0);}";
 
-	// glCreateShader : generates the two shaders of types GL_VERTEX_SHADER and GL_FRAGMENT_SHADER
-	// OpenGL creates each shader object, and returns an integer ID for each
 	GLuint vShader = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-	// loads the GLSL code from the strings into the empty shader objects
-	// glShaderSource(ShaderObject, NumberOfStrings : 1, ArrayOfPointers, -)
 	glShaderSource(vShader, 1, &vshaderSource, nullptr);
 	glShaderSource(fShader, 1, &fshaderSource, nullptr);
 
-	// the shaders are each compiled
 	glCompileShader(vShader);
+	checkOpenGLError();
+	glGetShaderiv(vShader, GL_COMPILE_STATUS, &vertCompiled);
+	if (vertCompiled != 1)
+	{
+		cout << "vertex compilation failed" << endl;
+		printShaderLog(vShader);
+	}
+
 	glCompileShader(fShader);
+	checkOpenGLError();
+	glGetShaderiv(fShader, GL_COMPILE_STATUS, &fragCompiled);
+	if (fragCompiled != 1)
+	{
+		cout << "fragment compilation failed" << endl;
+		printShaderLog(fShader);
+	}
 
-	// the integer ID of a program object
 	GLuint vfProgram = glCreateProgram();
-
-	// attatches each of the shaders to the program object
 	glAttachShader(vfProgram, vShader);
 	glAttachShader(vfProgram, fShader);
 
-	// requests that the GLSL compiler ensure that the shaders are compatible
 	glLinkProgram(vfProgram);
+	checkOpenGLError();
+	glGetProgramiv(vfProgram, GL_LINK_STATUS, &linked);
+	if (linked != 1)
+	{
+		cout << "linking failed" << endl;
+		printProgramLog(vfProgram);
+	}
 
 	glDeleteShader(vShader);
 	glDeleteShader(fShader);
@@ -104,12 +161,8 @@ int main(void)
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);		   // and neither this
 	GLFWwindow *window = glfwCreateWindow(600, 600, "Chapter2 - program2", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
-
 	// Load GLAD so it configures OpenGL
 	gladLoadGL();
-	glfwSwapInterval(1);
-
-	// vertical synchronization (VSyc)
 	glfwSwapInterval(1);
 
 	init(window);
