@@ -11,6 +11,7 @@
         "initializer_list": "cpp",
         "span": "cpp",
         "iostream": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "cmath": "cpp"
     }
 }
