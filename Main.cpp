@@ -157,7 +157,7 @@ void display(GLFWwindow *window, double currentTime)
 
 	// initiates pipeline processing
 	// mode: GL_POINTS, from 0, one (point)
-	glDrawArrays(GL_POINTS, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 int main(void)
