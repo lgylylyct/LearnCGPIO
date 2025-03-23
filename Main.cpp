@@ -148,15 +148,35 @@ void init(GLFWwindow *window)
 	glBindVertexArray(vao[0]);
 }
 
+// location of triangle on x axis
+float x = 0.0f;
+// offset for moving the triangle
+float inc = 0.01f;
+
 void display(GLFWwindow *window, double currentTime)
 {
-	// loads the program containing the two compiled shaders into the OpenGL pipeline stages (onto the GPU)
+	// clear the background to black, each time
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	glUseProgram(renderingProgram);
 
-	glPointSize(50.0f);
+	x += inc;
 
-	// initiates pipeline processing
-	// mode: GL_POINTS, from 0, one (point)
+	if (x > 1.0f)
+	{
+		inc = -0.01f;
+	}
+
+	else if (x < -1.0f)
+	{
+		inc = 0.01f;
+	}
+
+	GLuint offsetLoc = glGetUniformLocation(renderingProgram, "offset");
+	glProgramUniform1f(renderingProgram, offsetLoc, x);
+
 	glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
