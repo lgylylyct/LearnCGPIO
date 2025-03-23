@@ -140,9 +140,9 @@ void display(GLFWwindow *window, double currentTime)
 
 	// cube planet ============================================
 	mvStack.push(mvStack.top()); // mvMat of sun
-	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(sin((float)currentTime) * 4.0,
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(sin((float)currentTime) * 8.0,
 															   0.0f,
-															   cos((float)currentTime) * 4.0));	 // planet position
+															   cos((float)currentTime) * 8.0));	 // planet position
 	mvStack.push(mvStack.top());																 // duplicating
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 1.0, 0.0)); // planet rotation
 
@@ -159,8 +159,8 @@ void display(GLFWwindow *window, double currentTime)
 
 	mvStack.push(mvStack.top()); // mvMat of planet
 	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(0.0f,
-															   sin((float)currentTime) * 2.0,
-															   cos((float)currentTime) * 2.0));	 // moon position
+															   sin((float)currentTime) * 3.0,
+															   cos((float)currentTime) * 3.0));	 // moon position
 	mvStack.push(mvStack.top());																 // duplicating
 	mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime, glm::vec3(0.0, 0.0, 1.0)); // moon rotation
 
@@ -176,6 +176,13 @@ void display(GLFWwindow *window, double currentTime)
 
 	stack<glm::mat4>().swap(mvStack);
 	glUseProgram(0);
+}
+
+void window_size_callback(GLFWwindow *win, int newWidth, int newHeight)
+{
+	aspect = (float)newWidth / (float)newHeight;
+	glViewport(0, 0, newWidth, newHeight);
+	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f);
 }
 
 int main(void)
@@ -196,6 +203,7 @@ int main(void)
 	gladLoadGL();
 	glfwSwapInterval(1);
 
+	glfwSetWindowSizeCallback(window, window_size_callback);
 	init(window);
 
 	while (!glfwWindowShouldClose(window))
