@@ -10,6 +10,7 @@
         "format": "cpp",
         "initializer_list": "cpp",
         "span": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "fstream": "cpp"
     }
 }

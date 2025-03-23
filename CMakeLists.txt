@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # 添加可执行文件
 add_executable(${PROJECT_NAME} 
                 Main.cpp
+                Utils.cpp
                 /home/linguoyu/Lib/glad/glad.c
                 /home/linguoyu/Software/imgui/imgui.cpp
                 /home/linguoyu/Software/imgui/imgui_demo.cpp
