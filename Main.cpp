@@ -115,7 +115,7 @@ void display(GLFWwindow *window, double currentTime)
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 24);
+	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
 }
 
 int main(void)
