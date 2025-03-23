@@ -27,12 +27,13 @@ using namespace std;
 // Utils util = Utils();
 float cameraX, cameraY, cameraZ;
 float cubeLocX, cubeLocY, cubeLocZ;
+float pyrLocX, pyrLocY, pyrLocZ;
 GLuint renderingProgram;
 GLuint vao[numVAOs];
 GLuint vbo[numVBOs];
 
 // variable allocation for display
-GLuint vLoc, tfLoc, projLoc;
+GLuint mvLoc, tfLoc, projLoc;
 // GLuint mvLoc, projLoc;
 int width, height, displayLoopi;
 float aspect;
@@ -42,7 +43,8 @@ glm::mat4 pMat, vMat, tMat, rMat, mMat, mvMat;
 void setupVertices(void)
 {
 	// clang-format off
-    float vertexPositions[108] = {
+	// 12 triangles * 3 vertices * 3 values (x, y, z)
+    float cubePositions[108] = {
         -1.0f,  1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,
          1.0f, -1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  1.0f, -1.0f,
          1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f, -1.0f,
@@ -56,6 +58,16 @@ void setupVertices(void)
         -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f,  1.0f,
          1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f, -1.0f,
     };
+
+	// 6 triangles * 3 vertices * 3 values
+    float pyramidPositions[54] = {
+        -1.0f, -1.0f,  1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+         1.0f, -1.0f,  1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+         1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+        -1.0f, -1.0f, -1.0f,  1.0f, -1.0f,  1.0f, -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f, -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f
+    };
 	// clang-format on
 
 	glGenVertexArrays(1, vao); // creates VAO and returns the integer ID
@@ -63,8 +75,10 @@ void setupVertices(void)
 	glGenBuffers(numVBOs, vbo); // creates VBO and returns the integer ID
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions,
-				 GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(cubePositions), cubePositions, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidPositions), pyramidPositions, GL_STATIC_DRAW);
 }
 
 void setMatrix(GLFWwindow *window)
@@ -73,10 +87,15 @@ void setMatrix(GLFWwindow *window)
 	aspect = (float)width / (float)height;
 	pMat = glm::perspective(1.0472f, aspect, 0.1f, 1000.0f); // 1.0472 radians == 60 degrees
 
-	// position the camera further down the positive Z axis (to see all of the cubes)
 	cameraX = 0.0f;
 	cameraY = 0.0f;
-	cameraZ = 32.0f;
+	cameraZ = 8.0f;
+	cubeLocX = 0.0f;
+	cubeLocY = -2.0f;
+	cubeLocZ = 0.0f;
+	pyrLocX = 2.0f;
+	pyrLocY = 2.0f;
+	pyrLocZ = 0.0f;
 }
 
 void init(GLFWwindow *window)
@@ -94,28 +113,39 @@ void display(GLFWwindow *window, double currentTime)
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	glUseProgram(renderingProgram);
-
-	vMat =
-		glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
-
-	vLoc = glGetUniformLocation(renderingProgram, "v_matrix");
 	projLoc = glGetUniformLocation(renderingProgram, "proj_matrix");
+	mvLoc = glGetUniformLocation(renderingProgram, "mv_matrix");
 
-	glUniformMatrix4fv(vLoc, 1, GL_FALSE, glm::value_ptr(vMat));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+	//  Cube  ============================================
+	vMat = glm::translate(glm::mat4(1.0f), glm::vec3(-cameraX, -cameraY, -cameraZ));
+	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(cubeLocX, cubeLocY, cubeLocZ));
+	mvMat = vMat * mMat;
 
-	timeFactor = ((float)currentTime);
-	tfLoc = glGetUniformLocation(renderingProgram, "tf");
-	glUniform1f(tfLoc, (float)timeFactor);
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+    glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 
-	glDrawArraysInstanced(GL_TRIANGLES, 0, 36, 100000);
+	// Pyramid ============================================
+	mMat = glm::translate(glm::mat4(1.0f), glm::vec3(pyrLocX, pyrLocY, pyrLocZ));
+	mvMat = vMat * mMat;
+
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDrawArrays(GL_TRIANGLES, 0, 18);
 }
 
 int main(void)
