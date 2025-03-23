@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/linguoyu/Software/imgui",
+                "/home/linguoyu/Software/imgui/backends",
+                "/home/linguoyu/Lib/",
+                "/usr/include/opencv4",
+                "/usr/include/GL",
+                "/usr/include/GLFW", 
+                "/usr/include/glm"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake Configure",  // CMake 配置任务
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S", ".",               // 源代码目录（当前目录）
+                "-B", "build",           // 构建目录
+                "-DCMAKE_BUILD_TYPE=Debug"  // 设置构建类型（可选）
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Make Build",       // Make 编译任务
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-C", "build",           // 在构建目录中运行 Make
+                "-j$(nproc)"             // 使用多核编译（Linux）
+            ],
+            "dependsOn": "CMake Configure",  // 依赖于 CMake 配置任务
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc"
+        }
+    ]
+}

@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "*.rmd": "markdown",
+        ".fantomasignore": "ignore",
+        "array": "cpp",
+        "string_view": "cpp",
+        "iosfwd": "cpp",
+        "ratio": "cpp",
+        "ostream": "cpp",
+        "format": "cpp",
+        "initializer_list": "cpp",
+        "span": "cpp"
+    }
+}
